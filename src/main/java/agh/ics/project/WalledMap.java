@@ -1,8 +1,10 @@
 package agh.ics.project;
 
 public class WalledMap extends AbstractMap{
-    WalledMap(int x, int y) {
-        super(x, y);
+
+
+    WalledMap(int x, int y, int startEnergy, int plantEnergy, double jungleRatio, int moveEnergy) {
+        super(x, y, startEnergy, plantEnergy, jungleRatio, moveEnergy);
     }
 
     @Override
