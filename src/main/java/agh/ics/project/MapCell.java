@@ -5,7 +5,7 @@ import java.util.*;
 import static java.lang.System.out;
 
 public class MapCell {
-    private SortedSet<Animal> animals=new TreeSet<>(new ComparatorByEnergy());
+    private ArrayList<Animal> animals=new ArrayList<>();
     private boolean hasPlant;
     private int plantEnergy;
     private int startEnergy;
@@ -20,24 +20,24 @@ public class MapCell {
         this.position=position;
     }
 
+
     public void eatPlant(){
         if (hasPlant && !animals.isEmpty())
         {
-            Iterator<Animal> maxAnimals=animals.iterator();
-            Animal currAnimal=maxAnimals.next();
+            Animal currAnimal=animals.get(0);
             int counter=1;
             int maxEnergy=currAnimal.energy;
-            while (maxAnimals.hasNext()){
-                if (maxAnimals.next().energy==maxEnergy)
-                    counter++;
-                else
-                    break;
+            int i=1;
+            while (i<animals.size() && animals.get(i).energy==maxEnergy){
+                counter++;
+                i++;
             }
             int currPlantEnergy=Math.round(plantEnergy/counter);
-            Iterator<Animal> maxAnimals1=animals.iterator();
+            i=0;
             while(counter>0){
-                maxAnimals1.next().energy+=currPlantEnergy;
+                animals.get(i).energy+=currPlantEnergy;
                 counter--;
+                i++;
             }
             hasPlant=false;
         }
@@ -45,9 +45,9 @@ public class MapCell {
 
     public void breed(){
         if (animals.size()>=2){
-            Iterator<Animal> iterator=animals.iterator();
-            Animal parent1= iterator.next();
-            Animal parent2= iterator.next();
+            Animal parent1= animals.get(0);
+            Animal parent2= animals.get(1);
+
             if (parent1.energy>=Math.round(startEnergy/2) && parent2.energy>=Math.round(startEnergy/2)){
                 double energyRatio=(double)parent1.energy/((double)parent1.energy+(double)parent2.energy);
                 int divisionPoint= (int) Math.round(32*energyRatio);
@@ -81,21 +81,24 @@ public class MapCell {
                 parent2.energy= (int) Math.round(parent2.energy*0.75);
 
                 Animal child=new Animal(map,position,childEnergy,childGenes);
-                addAnimal(child);
-                map.animalBorn(child);
+                map.placeAnimal(position,child);
             }
         }
     }
 
     public void addAnimal(Animal animal){
         animals.add(animal);
+        animals.sort(new ComparatorByEnergy());
     }
 
     public void removeAnimal(Animal animal){
         animals.remove(animal);
+        animals.sort(new ComparatorByEnergy());
     }
 
     public void addPlant(){
+        out.print("Added plant at: "+position);
+
         hasPlant=true;
     }
 
@@ -106,6 +109,4 @@ public class MapCell {
     public boolean hasPlant(){return hasPlant;}
 
     public Vector2d getPosition(){return position;}
-
-    public SortedSet getAnimals(){return animals;}
 }

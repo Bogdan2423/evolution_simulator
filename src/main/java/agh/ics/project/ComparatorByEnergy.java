@@ -8,7 +8,7 @@ public class ComparatorByEnergy implements Comparator<Animal> {
         if (a1.energy<a2.energy)
             return 1;
         else if (a1.energy== a2.energy)
-            return -1;
+            return 0;
         return -1;
     }
 }

@@ -1,9 +1,12 @@
 package agh.ics.project;
 
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Random;
+
+import static java.lang.System.out;
 
 public abstract class AbstractMap implements IPositionChangeObserver{
     protected Vector2d lowBoundary=new Vector2d(0,0);
@@ -19,6 +22,7 @@ public abstract class AbstractMap implements IPositionChangeObserver{
     protected double jungleRatio;
     protected int jungleSize;
     protected ArrayList<Animal> markedForDeath=new ArrayList<>();
+    protected int dayCount=0;
 
 
     AbstractMap(int x,int y, int startEnergy, int plantEnergy,double jungleRatio,int moveEnergy)
@@ -35,6 +39,23 @@ public abstract class AbstractMap implements IPositionChangeObserver{
         jungleUpBoundary=new Vector2d(x+jungleSideLength/2,y+jungleSideLength/2);
     }
 
+    public void newDay(){
+        out.print("\nDay "+dayCount);
+        out.print("\nAnimal count: "+animals.size()+"\n");
+
+        addPlants();
+        for (Animal animal:animals){
+            animal.randomMove();
+        }
+        killAnimals();
+        clearCells();
+        for (MapCell cell:mapCells.values()) {
+            cell.eatPlant();
+            cell.breed();
+        }
+        dayCount++;
+    }
+
     public void positionChanged(Vector2d oldPosition, Vector2d newPosition, Animal animal){
         mapCells.get(oldPosition).removeAnimal(animal);
         moveAnimal(newPosition, animal);
@@ -49,10 +70,25 @@ public abstract class AbstractMap implements IPositionChangeObserver{
     public void placeAnimal(Vector2d position, Animal animal){
         moveAnimal(position,animal);
         animals.add(animal);
+        out.print("\nNew animal at: "+position);
     }
 
-    public void animalBorn(Animal animal){
-        animals.add(animal);
+    public void putAnimalsRandomly(int n){
+        int x;
+        int y;
+        Vector2d pos;
+        Animal newAnimal;
+        while (n>0){
+            x= rand.nextInt(upBoundary.x+1);
+            y= rand.nextInt(upBoundary.y+1);
+            pos=new Vector2d(x,y);
+            if (mapCells.get(pos)==null)
+            {
+                newAnimal=new Animal(this,pos,startEnergy);
+                placeAnimal(pos,newAnimal);
+            }
+            n--;
+        }
     }
 
     public void animalDead(Animal animal){
@@ -80,18 +116,7 @@ public abstract class AbstractMap implements IPositionChangeObserver{
         markedForDeath.clear();
     }
 
-    public void newDay(){
-        addPlants();
-        for (Animal animal:animals){
-            animal.randomMove();
-        }
-        killAnimals();
-        clearCells();
-        for (MapCell cell:mapCells.values()){
-            cell.eatPlant();
-            cell.breed();
-        }
-    }
+
     private void addCell(Vector2d position){
         mapCells.put(position,new MapCell(plantEnergy,startEnergy,this,position));
     }
