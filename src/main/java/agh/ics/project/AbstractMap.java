@@ -35,8 +35,8 @@ public abstract class AbstractMap implements IPositionChangeObserver{
         double jungleSize=jungleRatio*x*y;
         this.jungleSize= (int) Math.round(jungleSize-1);
         int jungleSideLength= (int) Math.round(Math.sqrt(jungleSize));
-        jungleLowBoundary=new Vector2d(x-jungleSideLength/2,y-jungleSideLength/2);
-        jungleUpBoundary=new Vector2d(x+jungleSideLength/2,y+jungleSideLength/2);
+        jungleLowBoundary=new Vector2d(x/2-jungleSideLength/2,y/2-jungleSideLength/2);
+        jungleUpBoundary=new Vector2d(x/2+jungleSideLength/2,y/2+jungleSideLength/2);
     }
 
     public void newDay(){
@@ -169,4 +169,6 @@ public abstract class AbstractMap implements IPositionChangeObserver{
     public void eatAtPos(Vector2d position){mapCells.get(position).eatPlant();}
 
     public abstract Vector2d getMoveVector(Vector2d oldPosition, Vector2d newPosition);
+
+    public boolean isOccupied(Vector2d pos){return mapCells.get(pos)!=null;}
 }

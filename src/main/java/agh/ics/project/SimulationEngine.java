@@ -8,6 +8,7 @@ import static java.lang.System.out;
 public class SimulationEngine implements Runnable {
     private AbstractMap map;
     private App app;
+    private boolean walledMap;
     SimulationEngine(App app, boolean walledMap, int width, int height, int startEnergy, int moveEnergy, int plantEnergy, double jungleRatio, int animalCount)
     {
         this.app=app;
@@ -18,8 +19,9 @@ public class SimulationEngine implements Runnable {
         if (animalCount>width*height)
             throw new IllegalArgumentException("Can't place that many animals!");
 
+        this.walledMap=walledMap;
         if (walledMap)
-            map=new WalledMap(width,height,startEnergy,plantEnergy,jungleRatio,moveEnergy);
+            map = new WalledMap(width, height, startEnergy, plantEnergy, jungleRatio, moveEnergy);
         else
             map=new UnboundMap(width,height,startEnergy,plantEnergy,jungleRatio,moveEnergy);
 
@@ -30,15 +32,17 @@ public class SimulationEngine implements Runnable {
     public void run() {
         int i=1000;
         while(i>0) {
-            int moveDelay = 10;
+            int moveDelay = 1000;
             map.newDay();
-            /*Platform.runLater(() -> app.showMap());
+            Platform.runLater(() -> app.showMap(walledMap));
             try {
                 Thread.sleep(moveDelay);
             } catch (InterruptedException ex) {
                 out.print("Simulation stopped");
-            }*/
+            }
             i--;
         }
     }
+
+    public AbstractMap getMap(){return map;}
 }
