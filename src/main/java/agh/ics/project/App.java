@@ -2,16 +2,21 @@ package agh.ics.project;
 
 import javafx.application.Application;
 import javafx.geometry.HPos;
+import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
+import javafx.scene.shape.Rectangle;
 
+import static java.lang.System.in;
 import static java.lang.System.out;
 
 public class App extends Application {
@@ -178,11 +183,18 @@ public class App extends Application {
             VBox vBox;
             while (index < range) {
                 Vector2d actualPosition = new Vector2d(lowBoundary.x + index - 1, upBoundary.y - verticalIndex + 1);
-                if (map.isOccupied(actualPosition)) {
+                if (map.isOccupied(actualPosition))
                     vBox = new GuiElementBox((MapCell) map.objectAt(actualPosition),columnWidth,rowHeight).getvBox();
-                    GridPane.setHalignment(vBox, HPos.CENTER);
-                    grid.add(vBox, index, verticalIndex);
-                }
+                else
+                    vBox=new VBox();
+
+                if(map.isInJungle(actualPosition))
+                    vBox.setBackground(new Background(new BackgroundFill(Paint.valueOf("#2c8a12"),CornerRadii.EMPTY, Insets.EMPTY)));
+                else
+                    vBox.setBackground(new Background(new BackgroundFill(Paint.valueOf("#3db36e"),CornerRadii.EMPTY, Insets.EMPTY)));
+
+                GridPane.setHalignment(vBox, HPos.CENTER);
+                grid.add(vBox, index, verticalIndex);
                 index++;
             }
             verticalIndex++;

@@ -40,6 +40,7 @@ public abstract class AbstractMap implements IPositionChangeObserver{
         jungleLowBoundary=new Vector2d(x/2-jungleSideLength/2,y/2-jungleSideLength/2);
         jungleUpBoundary=new Vector2d(x/2+jungleSideLength/2,y/2+jungleSideLength/2);
         this.isMagical=isMagical;
+
     }
 
     public void newDay(){
@@ -125,6 +126,7 @@ public abstract class AbstractMap implements IPositionChangeObserver{
         }
         for (Vector2d pos:toClear){
             mapCells.remove(pos);
+
         }
     }
 
@@ -146,25 +148,23 @@ public abstract class AbstractMap implements IPositionChangeObserver{
     private void addPlants(){
         boolean placedInJungle=false;
         boolean placedOutsideJungle=false;
-        Vector2d pos;
         int i=0;
-        while((!placedInJungle || !placedOutsideJungle)){
+        Vector2d pos;
+        while((!placedInJungle || !placedOutsideJungle)&&i<upBoundary.x*upBoundary.y*2){
             pos=getRandomEmptyPosition();
-            if (pos==null)
-                break;
+            if (pos==null) {
+                placedInJungle=true;
+                placedOutsideJungle=true;
+            }
             else if (isInJungle(pos)&&!placedInJungle){
-                if (mapCells.get(pos)==null){
-                    addCell(pos);
-                    mapCells.get(pos).addPlant();
-                    placedInJungle=true;
-                }
+                addCell(pos);
+                mapCells.get(pos).addPlant();
+                placedInJungle=true;
             }
             else if(!isInJungle(pos)&&!placedOutsideJungle){
-                if (mapCells.get(pos)==null){
-                    addCell(pos);
-                    mapCells.get(pos).addPlant();
-                    placedOutsideJungle=true;
-                }
+                addCell(pos);
+                mapCells.get(pos).addPlant();
+                placedOutsideJungle=true;
             }
             i++;
         }
