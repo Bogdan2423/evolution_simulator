@@ -30,6 +30,8 @@ public class App extends Application {
     private int rowHeight;
     private int sceneWidth=1500;
     private int sceneHeight=800;
+    private SimulationEngine leftEng;
+    private SimulationEngine rightEng;
     private Thread leftEngineThread;
     private Thread rightEngineThread;
 
@@ -54,18 +56,20 @@ public class App extends Application {
         TextField animalCountField=new TextField();
         Label magicalLabel=new Label("Magical simulation:");
         CheckBox leftMagical=new CheckBox("Left map");
-        CheckBox rightMagical=new CheckBox("Left map");
+        CheckBox rightMagical=new CheckBox("Right map");
         HBox checkHBox=new HBox(leftMagical,rightMagical);
         Button startButton=new Button("Start");
-        Button pauseButton=new Button("Pause");
-        Button resumeButton=new Button("Resume");
-        HBox buttonsBox=new HBox(startButton,pauseButton,resumeButton);
+        Button leftPauseButton=new Button("Pause/resume left map");
+        Button rightPauseButton=new Button("Pause/resume right map");
+        HBox buttonsBox=new HBox(startButton,leftPauseButton,rightPauseButton);
         Label exceptionLabel=new Label();
         VBox parametersBox=new VBox(xLabel,xField,yLabel,yField,startEnergyLabel,startEnergyField,
                 moveEnergyLabel,moveEnergyField,plantEnergyLabel,plantEnergyField,jungleRatioLabel,jungleRatioField,
                 animalCountLabel,animalCountField,magicalLabel,checkHBox,buttonsBox,exceptionLabel);
 
-        HBox hBox= new HBox(parametersBox,leftGrid,rightGrid);
+        VBox statsBox=new VBox();
+
+        HBox hBox= new HBox(parametersBox,leftGrid,rightGrid,statsBox);
 
         Scene scene = new Scene(hBox,1500,800);
         primaryStage.setScene(scene);
@@ -90,11 +94,11 @@ public class App extends Application {
                 animalCount = Integer.parseInt(animalCountField.getText());
                 isLeftMagical=leftMagical.isSelected();
                 isRightMagical=rightMagical.isSelected();
-                columnWidth = ((sceneWidth - 200) / (2 * upBoundary.x));
+                columnWidth = ((sceneWidth - 400) / (2 * upBoundary.x));
                 rowHeight = ((sceneHeight - 200) / (upBoundary.y));
-                SimulationEngine rightEng = new SimulationEngine(this, true, upBoundary.x, upBoundary.y, startEnergy,
+                rightEng = new SimulationEngine(this, true, upBoundary.x, upBoundary.y, startEnergy,
                         moveEnergy, plantEnergy, jungleRatio, animalCount,isRightMagical);
-                SimulationEngine leftEng = new SimulationEngine(this, false, upBoundary.x, upBoundary.y, startEnergy,
+                leftEng = new SimulationEngine(this, false, upBoundary.x, upBoundary.y, startEnergy,
                         moveEnergy, plantEnergy, jungleRatio, animalCount,isLeftMagical);
                 leftMap = leftEng.getMap();
                 rightMap = rightEng.getMap();
@@ -107,15 +111,11 @@ public class App extends Application {
             {
                 exceptionLabel.setText("Enter all parameters correctly!\n"+ex);
             }
-            pauseButton.setOnAction((event1 -> {
+            leftPauseButton.setOnAction((event1 -> {
                 leftEngineThread.interrupt();
-                rightEngineThread.interrupt();
-                exceptionLabel.setText("Simulation paused");
             }));
-            resumeButton.setOnAction((event1 -> {
-                leftEngineThread.interrupt();
+            rightPauseButton.setOnAction((event2 -> {
                 rightEngineThread.interrupt();
-                exceptionLabel.setText("");
             }));
         }));
 
@@ -183,8 +183,12 @@ public class App extends Application {
             VBox vBox;
             while (index < range) {
                 Vector2d actualPosition = new Vector2d(lowBoundary.x + index - 1, upBoundary.y - verticalIndex + 1);
-                if (map.isOccupied(actualPosition))
-                    vBox = new GuiElementBox((MapCell) map.objectAt(actualPosition),columnWidth,rowHeight).getvBox();
+                if (map.isOccupied(actualPosition)) {
+                    if (walledMap)
+                        vBox = new GuiElementBox((MapCell) map.objectAt(actualPosition), columnWidth, rowHeight, rightEng).getvBox();
+                    else
+                        vBox = new GuiElementBox((MapCell) map.objectAt(actualPosition), columnWidth, rowHeight, leftEng).getvBox();
+                }
                 else
                     vBox=new VBox();
 

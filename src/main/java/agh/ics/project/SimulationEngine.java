@@ -44,6 +44,9 @@ public class SimulationEngine implements Runnable {
             }
             }
         }
+    public void setAnimal(Animal animal){
+        out.print(animal);
+    }
 
     public AbstractMap getMap(){return map;}
 }

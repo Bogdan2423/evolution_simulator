@@ -16,14 +16,16 @@ public class GuiElementBox {
     private VBox vBox;
     private Label label;
     private ImageView imageView;
+    private SimulationEngine engine;
 
-    GuiElementBox(MapCell element,int x, int y){
+    GuiElementBox(MapCell element,int x, int y,SimulationEngine engine){
         try {
             create(element,x,y);
         }
         catch (FileNotFoundException ex){
             out.print("File not found: "+ex);
         }
+        this.engine=engine;
     }
 
     public void create(MapCell element,int x,int y) throws FileNotFoundException{
@@ -36,6 +38,7 @@ public class GuiElementBox {
         vBox.setMaxWidth(x);
         vBox.setMaxHeight(y);
         vBox.getChildren().addAll(imageView,label);
+        vBox.setOnMouseClicked(event -> {engine.setAnimal(element.getTopAnimal());});
     }
 
     public VBox getvBox(){return vBox;}

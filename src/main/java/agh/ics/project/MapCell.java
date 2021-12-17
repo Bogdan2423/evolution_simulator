@@ -121,4 +121,8 @@ public class MapCell {
             return (""+animals.get(0).energy);
         return("");
     }
+
+    public Animal getTopAnimal(){
+        return this.animals.get(0);
+    }
 }
