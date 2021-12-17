@@ -17,24 +17,24 @@ public class GuiElementBox {
     private Label label;
     private ImageView imageView;
 
-    GuiElementBox(MapCell element){
+    GuiElementBox(MapCell element,int x, int y){
         try {
-            create(element);
+            create(element,x,y);
         }
         catch (FileNotFoundException ex){
             out.print("File not found: "+ex);
         }
     }
 
-    public void create(MapCell element) throws FileNotFoundException{
+    public void create(MapCell element,int x,int y) throws FileNotFoundException{
         Image image = new Image(new FileInputStream(element.getImagePath()));
         imageView = new ImageView(image);
-        imageView.setFitWidth(20);
-        imageView.setFitHeight(20);
-
-        label=new Label("placeholder");
-
+        imageView.setFitWidth(x*0.9);
+        imageView.setFitHeight(y*0.6);
+        label=new Label(element.getLabel());
         vBox=new VBox();
+        vBox.setMaxWidth(x);
+        vBox.setMaxHeight(y);
         vBox.getChildren().addAll(imageView,label);
     }
 

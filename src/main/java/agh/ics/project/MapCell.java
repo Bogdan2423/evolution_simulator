@@ -106,8 +106,6 @@ public class MapCell {
         return (animals.isEmpty() && !hasPlant);
     }
 
-    public boolean hasPlant(){return hasPlant;}
-
     public Vector2d getPosition(){return position;}
 
     public String getImagePath() {
@@ -115,5 +113,12 @@ public class MapCell {
             return ("src/main/resources/grass.png");
         else
             return ("src/main/resources/animal.png");
+    }
+    public String getLabel() {
+        if (hasPlant && animals.isEmpty())
+            return ("Plant");
+        else if (!animals.isEmpty())
+            return (""+animals.get(0).energy);
+        return("");
     }
 }

@@ -23,9 +23,11 @@ public abstract class AbstractMap implements IPositionChangeObserver{
     protected int jungleSize;
     protected ArrayList<Animal> markedForDeath=new ArrayList<>();
     protected int dayCount=0;
+    protected int magicalCount=3;
+    protected boolean isMagical;
 
 
-    AbstractMap(int x,int y, int startEnergy, int plantEnergy,double jungleRatio,int moveEnergy)
+    AbstractMap(int x,int y, int startEnergy, int plantEnergy,double jungleRatio,int moveEnergy,boolean isMagical)
     {
         this.upBoundary=new Vector2d(x,y);
         this.startEnergy=startEnergy;
@@ -37,11 +39,16 @@ public abstract class AbstractMap implements IPositionChangeObserver{
         int jungleSideLength= (int) Math.round(Math.sqrt(jungleSize));
         jungleLowBoundary=new Vector2d(x/2-jungleSideLength/2,y/2-jungleSideLength/2);
         jungleUpBoundary=new Vector2d(x/2+jungleSideLength/2,y/2+jungleSideLength/2);
+        this.isMagical=isMagical;
     }
 
     public void newDay(){
         out.print("\nDay "+dayCount);
         out.print("\nAnimal count: "+animals.size()+"\n");
+        if(isMagical){
+            if(animals.size()==5 && magicalCount>0)
+                magicSpawn();
+        }
 
         addPlants();
         for (Animal animal:animals){
@@ -54,6 +61,23 @@ public abstract class AbstractMap implements IPositionChangeObserver{
             cell.breed();
         }
         dayCount++;
+    }
+
+    private void magicSpawn(){
+        magicalCount--;
+        int i=5;
+        int animalIndex;
+        int[] genesCopy;
+        Vector2d initPos;
+        while (i>0){
+            i--;
+            animalIndex= rand.nextInt(animals.size());
+            genesCopy=animals.get(animalIndex).getGenes().clone();
+            initPos=getRandomEmptyPosition();
+            if (initPos==null)
+                return;
+            placeAnimal(initPos,new Animal(this,initPos,startEnergy,genesCopy));
+        }
     }
 
     public void positionChanged(Vector2d oldPosition, Vector2d newPosition, Animal animal){
@@ -74,14 +98,12 @@ public abstract class AbstractMap implements IPositionChangeObserver{
     }
 
     public void putAnimalsRandomly(int n){
-        int x;
-        int y;
         Vector2d pos;
         Animal newAnimal;
         while (n>0){
-            x= rand.nextInt(upBoundary.x+1);
-            y= rand.nextInt(upBoundary.y+1);
-            pos=new Vector2d(x,y);
+            pos=getRandomEmptyPosition();
+            if (pos==null)
+                return;
             if (mapCells.get(pos)==null)
             {
                 newAnimal=new Animal(this,pos,startEnergy);
@@ -124,15 +146,13 @@ public abstract class AbstractMap implements IPositionChangeObserver{
     private void addPlants(){
         boolean placedInJungle=false;
         boolean placedOutsideJungle=false;
-        int x;
-        int y;
         Vector2d pos;
         int i=0;
-        while((!placedInJungle || !placedOutsideJungle)&&i<upBoundary.x* upBoundary.y*2){
-            x= rand.nextInt(upBoundary.x+1);
-            y= rand.nextInt(upBoundary.y+1);
-            pos=new Vector2d(x,y);
-            if (isInJungle(pos)&&!placedInJungle){
+        while((!placedInJungle || !placedOutsideJungle)){
+            pos=getRandomEmptyPosition();
+            if (pos==null)
+                break;
+            else if (isInJungle(pos)&&!placedInJungle){
                 if (mapCells.get(pos)==null){
                     addCell(pos);
                     mapCells.get(pos).addPlant();
@@ -150,6 +170,21 @@ public abstract class AbstractMap implements IPositionChangeObserver{
         }
     }
 
+    private Vector2d getRandomEmptyPosition(){
+        int i=0;
+        int x;
+        int y;
+        Vector2d pos;
+        while(i<upBoundary.x* upBoundary.y*2) {
+            x = rand.nextInt(upBoundary.x + 1);
+            y = rand.nextInt(upBoundary.y + 1);
+            pos = new Vector2d(x, y);
+            if (!isOccupied(pos))
+                return pos;
+            i++;
+        }
+        return null;
+    }
 
     public boolean isInJungle(Vector2d position){
         return position.follows(jungleLowBoundary)&& position.precedes(jungleUpBoundary);

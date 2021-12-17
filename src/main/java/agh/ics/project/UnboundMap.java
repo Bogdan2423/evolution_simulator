@@ -2,8 +2,9 @@ package agh.ics.project;
 
 public class UnboundMap extends AbstractMap{
 
-    UnboundMap(int x, int y, int startEnergy, int plantEnergy, double jungleRatio, int moveEnergy) {
-        super(x, y, startEnergy, plantEnergy, jungleRatio, moveEnergy);
+
+    UnboundMap(int x, int y, int startEnergy, int plantEnergy, double jungleRatio, int moveEnergy, boolean isMagical) {
+        super(x, y, startEnergy, plantEnergy, jungleRatio, moveEnergy, isMagical);
     }
 
     @Override
