@@ -25,6 +25,10 @@ public abstract class AbstractMap implements IPositionChangeObserver{
     protected int dayCount=0;
     protected int magicalCount=3;
     protected boolean isMagical;
+    protected int plantCount=0;
+    protected int deadAnimalsCount=0;
+    protected int daysLivedSum=0;
+    protected Map<int[], Integer> genotypeCounter=new LinkedHashMap<>();
 
 
     AbstractMap(int x,int y, int startEnergy, int plantEnergy,double jungleRatio,int moveEnergy,boolean isMagical)
@@ -67,13 +71,11 @@ public abstract class AbstractMap implements IPositionChangeObserver{
     private void magicSpawn(){
         magicalCount--;
         int i=5;
-        int animalIndex;
         int[] genesCopy;
         Vector2d initPos;
         while (i>0){
             i--;
-            animalIndex= rand.nextInt(animals.size());
-            genesCopy=animals.get(animalIndex).getGenes().clone();
+            genesCopy=animals.get(i).getGenes().clone();
             initPos=getRandomEmptyPosition();
             if (initPos==null)
                 return;
@@ -95,6 +97,12 @@ public abstract class AbstractMap implements IPositionChangeObserver{
     public void placeAnimal(Vector2d position, Animal animal){
         moveAnimal(position,animal);
         animals.add(animal);
+        if (genotypeCounter.get(animal.getGenes())==null)
+            genotypeCounter.put(animal.getGenes(), 1);
+        else {
+            Integer curr=genotypeCounter.get(animal.getGenes());
+            genotypeCounter.put(animal.getGenes(), curr+1);
+        }
         out.print("\nNew animal at: "+position);
     }
 
@@ -118,6 +126,31 @@ public abstract class AbstractMap implements IPositionChangeObserver{
         markedForDeath.add(animal);
     }
 
+
+    private void killAnimals(){
+        Integer curr;
+        for(Animal animal:markedForDeath){
+            Vector2d pos=animal.getPosition();
+            MapCell cell=mapCells.get(pos);
+            deadAnimalsCount++;
+            daysLivedSum+=animal.getDaysLived();
+            if(genotypeCounter.get(animal.getGenes())==1)
+                genotypeCounter.remove(animal.getGenes());
+            else{
+                curr=genotypeCounter.get(animal.getGenes());
+                genotypeCounter.put(animal.getGenes(), curr-1);
+            }
+            cell.removeAnimal(animal);
+            animals.remove(animal);
+        }
+        markedForDeath.clear();
+    }
+
+
+    private void addCell(Vector2d position){
+        mapCells.put(position,new MapCell(plantEnergy,startEnergy,this,position));
+    }
+
     private void clearCells(){
         ArrayList<Vector2d> toClear=new ArrayList<>();
         for (MapCell cell:mapCells.values()){
@@ -128,21 +161,6 @@ public abstract class AbstractMap implements IPositionChangeObserver{
             mapCells.remove(pos);
 
         }
-    }
-
-    private void killAnimals(){
-        for(Animal animal:markedForDeath){
-            Vector2d pos=animal.getPosition();
-            MapCell cell=mapCells.get(pos);
-            cell.removeAnimal(animal);
-            animals.remove(animal);
-        }
-        markedForDeath.clear();
-    }
-
-
-    private void addCell(Vector2d position){
-        mapCells.put(position,new MapCell(plantEnergy,startEnergy,this,position));
     }
 
     private void addPlants(){
@@ -159,11 +177,13 @@ public abstract class AbstractMap implements IPositionChangeObserver{
             else if (isInJungle(pos)&&!placedInJungle){
                 addCell(pos);
                 mapCells.get(pos).addPlant();
+                plantCount++;
                 placedInJungle=true;
             }
             else if(!isInJungle(pos)&&!placedOutsideJungle){
                 addCell(pos);
                 mapCells.get(pos).addPlant();
+                plantCount++;
                 placedOutsideJungle=true;
             }
             i++;
@@ -190,13 +210,48 @@ public abstract class AbstractMap implements IPositionChangeObserver{
         return position.follows(jungleLowBoundary)&& position.precedes(jungleUpBoundary);
     }
 
+    public void plantEaten(){plantCount--;}
+
     public int getMoveEnergy(){return moveEnergy;}
 
+    public double getAverageEnergy(){
+        int sum=0;
+        for(Animal animal:animals){
+            sum+=animal.energy;
+        }
+        return (double)sum/(double)animals.size();
+    }
 
+    public int[] getTopGenotype(){
+        int currMax=0;
+        int[] topGenotype = new int[0];
+        for(int[] genotype:genotypeCounter.keySet()){
+            if (genotypeCounter.get(genotype)>currMax){
+                currMax=genotypeCounter.get(genotype);
+                topGenotype=genotype;
+            }
+        }
+        return topGenotype;
+    }
+
+    public int getAnimalCount(){return animals.size();}
+
+    public double getAverageDaysLived(){
+        return (double)daysLivedSum/(double)deadAnimalsCount;
+    }
+
+    public double getAverageChildrenCount(){
+        int sum=0;
+        for(Animal animal:animals){
+            sum+=animal.getChildrenCount();
+        }
+        return (double)sum/(double)animals.size();
+    }
 
     public Object objectAt(Vector2d position){
         return mapCells.get(position);
     }
+    public int getPlantCount(){return plantCount;}
 
     public void addPlantAtPos(Vector2d position){mapCells.get(position).addPlant();}
 

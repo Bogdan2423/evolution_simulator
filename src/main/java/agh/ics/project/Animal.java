@@ -12,6 +12,8 @@ public class Animal {
     private int[] genes= new int[32];
     private ArrayList<IPositionChangeObserver> observers=new ArrayList<>();
     private Random rand=new Random();
+    private int daysLived=0;
+    private int childrenCount=0;
 
     Animal(AbstractMap map, Vector2d initialPosition, int initialEnergy){
         this.map=map;
@@ -90,6 +92,7 @@ public class Animal {
     public void randomMove(){move(randomizeDirection());}
 
     private void move(int direction) {
+        daysLived++;
         energy-= map.getMoveEnergy();
         if (energy<=0){
             map.animalDead(this);
@@ -121,9 +124,13 @@ public class Animal {
         return rotation;
     }
 
-    public int getEnergy(){return energy;}
+    public int getDaysLived(){return daysLived;}
 
     public int[] getGenes(){return genes;}
+
+    public void newChild(){childrenCount++;}
+
+    public int getChildrenCount(){return childrenCount;}
 
     void positionChanged(Vector2d oldPosition, Vector2d newPosition, Animal animal){
         observers.forEach(observer -> observer.positionChanged(oldPosition, newPosition, animal));

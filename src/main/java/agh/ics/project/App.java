@@ -16,6 +16,8 @@ import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.shape.Rectangle;
 
+import java.util.Arrays;
+
 import static java.lang.System.in;
 import static java.lang.System.out;
 
@@ -34,12 +36,19 @@ public class App extends Application {
     private SimulationEngine rightEng;
     private Thread leftEngineThread;
     private Thread rightEngineThread;
+    Label leftAnimalCountLabel=new Label();
+    Label rightAnimalCountLabel=new Label();
+    Label leftAverageEnergyLabel=new Label();
+    Label rightAverageEnergyLabel=new Label();
+    Label leftAverageDaysLivedLabel=new Label();
+    Label rightAverageDaysLivedLabel=new Label();
+    Label leftDominatingGenotypeLabel=new Label();
+    Label rightDominatingGenotypeLabel=new Label();
+    Label leftPlantCountLabel=new Label();
+    Label rightPlantCountLabel=new Label();
 
     @Override
     public void start(Stage primaryStage) {
-        rightGrid = new GridPane();
-        leftGrid = new GridPane();
-
         Label xLabel=new Label("Map width:");
         TextField xField=new TextField();
         Label yLabel=new Label("Map height:");
@@ -62,14 +71,26 @@ public class App extends Application {
         Button leftPauseButton=new Button("Pause/resume left map");
         Button rightPauseButton=new Button("Pause/resume right map");
         HBox buttonsBox=new HBox(startButton,leftPauseButton,rightPauseButton);
+        Label descriptionLabel=new Label("Each animal changes its direction or moves every day, based on their genotype\n" +
+                "Animals lose energy from moving, but may regain it by eating plants\n" +
+                "Each day one plant appears in the jungle and one outside of the jungle\n" +
+                "If two animals with enough energy enter one map cell, they will reproduce, passing part of their genes to their child\n" +
+                "On the left map, if the animal walks into the border, it will appear on the other side of the map\n" +
+                "The right map is walled-animals cannot move outside the border\n" +
+                "If \"Magical simulation\" is selected, when there is exactly 5 animals on the map at the beginning of a day,\n" +
+                "5 new animals, which are copies of existing animals, will appear randomly\n" +
+                "To start the simulation, enter the map parameters and press Start");
         Label exceptionLabel=new Label();
         VBox parametersBox=new VBox(xLabel,xField,yLabel,yField,startEnergyLabel,startEnergyField,
                 moveEnergyLabel,moveEnergyField,plantEnergyLabel,plantEnergyField,jungleRatioLabel,jungleRatioField,
-                animalCountLabel,animalCountField,magicalLabel,checkHBox,buttonsBox,exceptionLabel);
+                animalCountLabel,animalCountField,magicalLabel,checkHBox,buttonsBox,descriptionLabel,exceptionLabel);
 
-        VBox statsBox=new VBox();
+        rightGrid = new GridPane();
+        leftGrid = new GridPane();
+        VBox leftMapBox=new VBox(leftGrid,leftAnimalCountLabel,leftAverageEnergyLabel,leftAverageDaysLivedLabel,leftPlantCountLabel,leftDominatingGenotypeLabel);
+        VBox rightMapBox=new VBox(rightGrid,rightAnimalCountLabel,rightAverageEnergyLabel,rightAverageDaysLivedLabel,rightPlantCountLabel,rightDominatingGenotypeLabel);
 
-        HBox hBox= new HBox(parametersBox,leftGrid,rightGrid,statsBox);
+        HBox hBox= new HBox(parametersBox,leftMapBox,rightMapBox);
 
         Scene scene = new Scene(hBox,1500,800);
         primaryStage.setScene(scene);
@@ -123,10 +144,22 @@ public class App extends Application {
 
     public void showMap(boolean walledMap){
         GridPane grid;
-        if (walledMap)
-            grid=rightGrid;
-        else
-            grid=leftGrid;
+        if (walledMap) {
+            grid = rightGrid;
+            rightAnimalCountLabel.setText("Current animal count: "+rightMap.getAnimalCount());
+            rightAverageDaysLivedLabel.setText("Average days lived of dead animals: "+rightMap.getAverageDaysLived());
+            rightAverageEnergyLabel.setText("Average animal energy:"+rightMap.getAverageEnergy());
+            rightDominatingGenotypeLabel.setText("Dominating genotype: "+Arrays.toString(rightMap.getTopGenotype()));
+            rightPlantCountLabel.setText("Number of plants: "+rightMap.getPlantCount());
+        }
+        else {
+            grid = leftGrid;
+            leftAnimalCountLabel.setText("Current animal count: "+leftMap.getAnimalCount());
+            leftAverageDaysLivedLabel.setText("Average days lived of dead animals: "+leftMap.getAverageDaysLived());
+            leftAverageEnergyLabel.setText("Average animal energy:"+leftMap.getAverageEnergy());
+            leftDominatingGenotypeLabel.setText("Dominating genotype: "+Arrays.toString(leftMap.getTopGenotype()));
+            leftPlantCountLabel.setText(("Number of plants: "+leftMap.getPlantCount()));
+        }
 
         grid.setGridLinesVisible(false);
         grid.getColumnConstraints().clear();

@@ -39,6 +39,7 @@ public class MapCell {
                 counter--;
                 i++;
             }
+            map.plantEaten();
             hasPlant=false;
         }
     }
@@ -79,6 +80,8 @@ public class MapCell {
                 int childEnergy= (int) Math.round(parent1.energy*0.25+parent2.energy*0.25);
                 parent1.energy= (int) Math.round(parent1.energy*0.75);
                 parent2.energy= (int) Math.round(parent2.energy*0.75);
+                parent1.newChild();
+                parent2.newChild();
 
                 Animal child=new Animal(map,position,childEnergy,childGenes);
                 map.placeAnimal(position,child);
@@ -116,7 +119,7 @@ public class MapCell {
     }
     public String getLabel() {
         if (hasPlant && animals.isEmpty())
-            return ("Plant");
+            return null;
         else if (!animals.isEmpty())
             return (""+animals.get(0).energy);
         return("");
