@@ -82,8 +82,10 @@ public class MapCell {
                 parent2.energy= (int) Math.round(parent2.energy*0.75);
                 parent1.newChild();
                 parent2.newChild();
+                if (parent1.isDescendantOf(map.getTrackedAnimal())|| parent2.isDescendantOf(map.getTrackedAnimal()))
+                    map.addDescendant();
 
-                Animal child=new Animal(map,position,childEnergy,childGenes);
+                Animal child=new Animal(map,position,childEnergy,childGenes,parent1,parent2);
                 map.placeAnimal(position,child);
             }
         }
@@ -114,6 +116,8 @@ public class MapCell {
     public String getImagePath() {
         if (hasPlant && animals.isEmpty())
             return ("src/main/resources/grass.png");
+        else if (map.isTracked(getTopAnimal()))
+            return ("src/main/resources/trackedAnimal.png");
         else
             return ("src/main/resources/animal.png");
     }

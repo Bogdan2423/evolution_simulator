@@ -33,6 +33,10 @@ public class MapChart {
     XYChart.Series daysLived=new XYChart.Series();
     XYChart.Series avgChildren=new XYChart.Series();
     Label genotypeLabel=new Label();
+    Label trackedChildrenLabel=new Label();
+    Label trackedDescendantsLabel=new Label();
+    Label trackedGenotype=new Label();
+    Label trackedDeathDay=new Label();
     VBox box;
     AbstractMap map;
 
@@ -61,7 +65,7 @@ public class MapChart {
         VBox box1=new VBox(animalLabel,animalChart,plantLabel,plantChart);
         VBox box2=new VBox(energyLabel,energyChart,daysLabel,daysChart);
         HBox hBox=new HBox(box1,box2);
-        box=new VBox(hBox,childrenLabel,childrenChart,genotypeLabel);
+        box=new VBox(hBox,childrenLabel,childrenChart,genotypeLabel,trackedGenotype,trackedChildrenLabel,trackedDescendantsLabel,trackedDeathDay);
     }
 
     public void update(){
@@ -70,7 +74,13 @@ public class MapChart {
         plantCount.getData().add(new XYChart.Data(map.getDayCount(),map.getPlantCount()));
         daysLived.getData().add(new XYChart.Data(map.getDayCount(),map.getAverageDaysLived()));
         avgChildren.getData().add(new XYChart.Data(map.getDayCount(),map.getAverageChildrenCount()));
-        genotypeLabel.setText("Dominating genotype: \n"+ Arrays.toString(map.getTopGenotype()));
+        genotypeLabel.setText("Dominating genotype: \n"+ map.getTopGenotype());
+        if (map.isAnimalTracked()){
+            trackedGenotype.setText("Tracked animal genotype: \n"+map.getTrackedGenes());
+            trackedChildrenLabel.setText("Tracked animal children count: "+map.getTrackedChildrenCount());
+            trackedDescendantsLabel.setText("Tracked animal descendants count: "+map.getDescendantCount());
+            trackedDeathDay.setText("Tracked animal death day: "+map.getTrackedDeathDay());
+        }
     }
 
     public VBox getChart(){

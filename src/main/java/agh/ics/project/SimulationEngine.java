@@ -9,6 +9,7 @@ public class SimulationEngine implements Runnable {
     private AbstractMap map;
     private App app;
     private boolean walledMap;
+    private boolean isPaused;
     SimulationEngine(App app, boolean walledMap, int width, int height, int startEnergy, int moveEnergy, int plantEnergy, double jungleRatio, int animalCount, boolean isMagical)
     {
         this.app=app;
@@ -30,22 +31,27 @@ public class SimulationEngine implements Runnable {
 
     @Override
     public void run() {
+        isPaused=false;
         while(true) {
             int moveDelay = 500;
             map.newDay();
             Platform.runLater(() -> app.showMap(walledMap));
             try {Thread.sleep(moveDelay);}
             catch (InterruptedException ex) {
-                out.print("Simulation stopped");
+                isPaused=true;
                 while(true) {
                     try {Thread.sleep(moveDelay);}
-                    catch (InterruptedException ex1) {break;}
+                    catch (InterruptedException ex1) {
+                        isPaused=false;
+                        break;
+                    }
                 }
             }
             }
         }
     public void setAnimal(Animal animal){
-        out.print(animal);
+        if (isPaused)
+            map.setAnimal(animal);
     }
 
     public AbstractMap getMap(){return map;}

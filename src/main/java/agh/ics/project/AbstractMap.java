@@ -1,10 +1,7 @@
 package agh.ics.project;
 
 import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 import static java.lang.System.out;
 
@@ -29,6 +26,8 @@ public abstract class AbstractMap implements IPositionChangeObserver{
     protected int deadAnimalsCount=0;
     protected int daysLivedSum=0;
     protected Map<int[], Integer> genotypeCounter=new LinkedHashMap<>();
+    protected Animal trackedAnimal;
+    protected int descendantCount;
 
 
     AbstractMap(int x,int y, int startEnergy, int plantEnergy,double jungleRatio,int moveEnergy,boolean isMagical)
@@ -222,7 +221,7 @@ public abstract class AbstractMap implements IPositionChangeObserver{
         return (double)sum/(double)animals.size();
     }
 
-    public int[] getTopGenotype(){
+    public String getTopGenotype(){
         int currMax=0;
         int[] topGenotype = new int[0];
         for(int[] genotype:genotypeCounter.keySet()){
@@ -231,7 +230,7 @@ public abstract class AbstractMap implements IPositionChangeObserver{
                 topGenotype=genotype;
             }
         }
-        return topGenotype;
+        return Arrays.toString(topGenotype);
     }
 
     public int getAnimalCount(){return animals.size();}
@@ -250,17 +249,36 @@ public abstract class AbstractMap implements IPositionChangeObserver{
         return (double)sum/(double)animals.size();
     }
 
+
+    public void setAnimal(Animal animal){
+        trackedAnimal=animal;
+        setDescendantCount();
+    }
+    private void setDescendantCount(){
+        int counter=0;
+        for(Animal animal:animals){
+            if (animal.isDescendantOf(trackedAnimal)){
+                counter++;
+            }
+        }
+        descendantCount=counter;
+    }
+    public void addDescendant(){
+        descendantCount++;
+    }
+
+    public boolean isTracked(Animal animal){return animal==trackedAnimal;}
+    public boolean isAnimalTracked(){return trackedAnimal!=null;}
     public Object objectAt(Vector2d position){
         return mapCells.get(position);
     }
+    public int getDescendantCount(){return descendantCount;}
+    public int getTrackedChildrenCount(){return trackedAnimal.getChildrenCount();}
+    public int getTrackedDeathDay(){return trackedAnimal.getDeathDay();}
+    public String getTrackedGenes(){return Arrays.toString(trackedAnimal.getGenes());}
+    public Animal getTrackedAnimal(){return trackedAnimal;}
     public int getPlantCount(){return plantCount;}
     public int getDayCount(){return dayCount;}
-    public void addPlantAtPos(Vector2d position){mapCells.get(position).addPlant();}
-
-    public void breedAtPos(Vector2d position){mapCells.get(position).breed();}
-    public void eatAtPos(Vector2d position){mapCells.get(position).eatPlant();}
-
     public abstract Vector2d getMoveVector(Vector2d oldPosition, Vector2d newPosition);
-
     public boolean isOccupied(Vector2d pos){return mapCells.get(pos)!=null;}
 }

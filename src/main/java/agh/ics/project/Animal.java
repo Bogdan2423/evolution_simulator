@@ -14,6 +14,9 @@ public class Animal {
     private Random rand=new Random();
     private int daysLived=0;
     private int childrenCount=0;
+    private Animal parent1;
+    private Animal parent2;
+    private int deathDay;
 
     Animal(AbstractMap map, Vector2d initialPosition, int initialEnergy){
         this.map=map;
@@ -89,6 +92,44 @@ public class Animal {
         this.genes=genes;
         addObserver(map);
     }
+
+    Animal(AbstractMap map, Vector2d initialPosition, int initialEnergy, int[] genes, Animal parent1, Animal parent2){
+        this.map=map;
+        this.position=initialPosition;
+        this.energy=initialEnergy;
+        int rotation=rand.nextInt(8);
+        switch (rotation){
+            case 0:
+                this.rotation=Rotation.N;
+                break;
+            case 1:
+                this.rotation=Rotation.NE;
+                break;
+            case 2:
+                this.rotation=Rotation.E;
+                break;
+            case 3:
+                this.rotation=Rotation.SE;
+                break;
+            case 4:
+                this.rotation=Rotation.S;
+                break;
+            case 5:
+                this.rotation=Rotation.SW;
+                break;
+            case 6:
+                this.rotation=Rotation.W;
+                break;
+            case 7:
+                this.rotation=Rotation.NW;
+                break;
+        }
+        this.genes=genes;
+        this.parent1=parent1;
+        this.parent2=parent2;
+        addObserver(map);
+    }
+
     public void randomMove(){move(randomizeDirection());}
 
     private void move(int direction) {
@@ -96,6 +137,7 @@ public class Animal {
         energy-= map.getMoveEnergy();
         if (energy<=0){
             map.animalDead(this);
+            deathDay= map.getDayCount();
             return;
         }
         Vector2d oldPosition = this.position;
@@ -131,6 +173,14 @@ public class Animal {
     public void newChild(){childrenCount++;}
 
     public int getChildrenCount(){return childrenCount;}
+
+    public boolean isDescendantOf(Animal animal){
+        if (parent1==null && parent2==null)
+            return false;
+        return parent1==animal||parent2==animal||parent1.isDescendantOf(animal)|| parent2.isDescendantOf(animal);
+    }
+
+    public int getDeathDay(){return deathDay;}
 
     void positionChanged(Vector2d oldPosition, Vector2d newPosition, Animal animal){
         observers.forEach(observer -> observer.positionChanged(oldPosition, newPosition, animal));
