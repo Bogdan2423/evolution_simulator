@@ -237,7 +237,9 @@ public abstract class AbstractMap implements IPositionChangeObserver{
     public int getAnimalCount(){return animals.size();}
 
     public double getAverageDaysLived(){
-        return (double)daysLivedSum/(double)deadAnimalsCount;
+        if (deadAnimalsCount>=1)
+            return  (double)daysLivedSum/(double)deadAnimalsCount;
+        return 0;
     }
 
     public double getAverageChildrenCount(){
@@ -252,7 +254,7 @@ public abstract class AbstractMap implements IPositionChangeObserver{
         return mapCells.get(position);
     }
     public int getPlantCount(){return plantCount;}
-
+    public int getDayCount(){return dayCount;}
     public void addPlantAtPos(Vector2d position){mapCells.get(position).addPlant();}
 
     public void breedAtPos(Vector2d position){mapCells.get(position).breed();}

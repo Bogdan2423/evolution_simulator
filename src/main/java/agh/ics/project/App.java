@@ -4,6 +4,9 @@ import javafx.application.Application;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
+import javafx.scene.chart.LineChart;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.TextField;
@@ -30,22 +33,14 @@ public class App extends Application {
     private GridPane rightGrid;
     private int columnWidth;
     private int rowHeight;
-    private int sceneWidth=1500;
-    private int sceneHeight=800;
+    private int sceneWidth=1600;
+    private int sceneHeight=900;
     private SimulationEngine leftEng;
     private SimulationEngine rightEng;
     private Thread leftEngineThread;
     private Thread rightEngineThread;
-    Label leftAnimalCountLabel=new Label();
-    Label rightAnimalCountLabel=new Label();
-    Label leftAverageEnergyLabel=new Label();
-    Label rightAverageEnergyLabel=new Label();
-    Label leftAverageDaysLivedLabel=new Label();
-    Label rightAverageDaysLivedLabel=new Label();
-    Label leftDominatingGenotypeLabel=new Label();
-    Label rightDominatingGenotypeLabel=new Label();
-    Label leftPlantCountLabel=new Label();
-    Label rightPlantCountLabel=new Label();
+    private MapChart leftChart;
+    private MapChart rightChart;
 
     @Override
     public void start(Stage primaryStage) {
@@ -85,14 +80,11 @@ public class App extends Application {
                 moveEnergyLabel,moveEnergyField,plantEnergyLabel,plantEnergyField,jungleRatioLabel,jungleRatioField,
                 animalCountLabel,animalCountField,magicalLabel,checkHBox,buttonsBox,descriptionLabel,exceptionLabel);
 
-        rightGrid = new GridPane();
-        leftGrid = new GridPane();
-        VBox leftMapBox=new VBox(leftGrid,leftAnimalCountLabel,leftAverageEnergyLabel,leftAverageDaysLivedLabel,leftPlantCountLabel,leftDominatingGenotypeLabel);
-        VBox rightMapBox=new VBox(rightGrid,rightAnimalCountLabel,rightAverageEnergyLabel,rightAverageDaysLivedLabel,rightPlantCountLabel,rightDominatingGenotypeLabel);
 
-        HBox hBox= new HBox(parametersBox,leftMapBox,rightMapBox);
 
-        Scene scene = new Scene(hBox,1500,800);
+        HBox hBox= new HBox(parametersBox);
+
+        Scene scene = new Scene(hBox,sceneWidth,sceneHeight);
         primaryStage.setScene(scene);
         primaryStage.show();
 
@@ -115,14 +107,21 @@ public class App extends Application {
                 animalCount = Integer.parseInt(animalCountField.getText());
                 isLeftMagical=leftMagical.isSelected();
                 isRightMagical=rightMagical.isSelected();
-                columnWidth = ((sceneWidth - 400) / (2 * upBoundary.x));
-                rowHeight = ((sceneHeight - 200) / (upBoundary.y));
+                columnWidth = ((sceneWidth - 800) / (2 * upBoundary.x));
+                rowHeight = ((sceneHeight - 400) / (upBoundary.y));
                 rightEng = new SimulationEngine(this, true, upBoundary.x, upBoundary.y, startEnergy,
                         moveEnergy, plantEnergy, jungleRatio, animalCount,isRightMagical);
                 leftEng = new SimulationEngine(this, false, upBoundary.x, upBoundary.y, startEnergy,
                         moveEnergy, plantEnergy, jungleRatio, animalCount,isLeftMagical);
                 leftMap = leftEng.getMap();
                 rightMap = rightEng.getMap();
+                rightGrid = new GridPane();
+                rightChart=new MapChart(rightMap);
+                leftGrid = new GridPane();
+                leftChart=new MapChart(leftMap);
+                HBox leftMapBox=new HBox(leftGrid,leftChart.getChart());
+                HBox rightMapBox=new HBox(rightGrid,rightChart.getChart());
+                hBox.getChildren().addAll(leftMapBox,rightMapBox);
                 leftEngineThread=new Thread(leftEng);
                 rightEngineThread=new Thread(rightEng);
                 leftEngineThread.start();
@@ -146,19 +145,11 @@ public class App extends Application {
         GridPane grid;
         if (walledMap) {
             grid = rightGrid;
-            rightAnimalCountLabel.setText("Current animal count: "+rightMap.getAnimalCount());
-            rightAverageDaysLivedLabel.setText("Average days lived of dead animals: "+rightMap.getAverageDaysLived());
-            rightAverageEnergyLabel.setText("Average animal energy:"+rightMap.getAverageEnergy());
-            rightDominatingGenotypeLabel.setText("Dominating genotype: "+Arrays.toString(rightMap.getTopGenotype()));
-            rightPlantCountLabel.setText("Number of plants: "+rightMap.getPlantCount());
+            rightChart.update();
         }
         else {
             grid = leftGrid;
-            leftAnimalCountLabel.setText("Current animal count: "+leftMap.getAnimalCount());
-            leftAverageDaysLivedLabel.setText("Average days lived of dead animals: "+leftMap.getAverageDaysLived());
-            leftAverageEnergyLabel.setText("Average animal energy:"+leftMap.getAverageEnergy());
-            leftDominatingGenotypeLabel.setText("Dominating genotype: "+Arrays.toString(leftMap.getTopGenotype()));
-            leftPlantCountLabel.setText(("Number of plants: "+leftMap.getPlantCount()));
+            leftChart.update();
         }
 
         grid.setGridLinesVisible(false);
