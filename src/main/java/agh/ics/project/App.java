@@ -4,25 +4,13 @@ import javafx.application.Application;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
-import javafx.scene.chart.LineChart;
-import javafx.scene.chart.NumberAxis;
-import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.*;
-import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
-import javafx.scene.text.Font;
 import javafx.stage.Stage;
-import javafx.scene.Node;
 import javafx.scene.control.Label;
-import javafx.scene.shape.Rectangle;
-
-import java.util.Arrays;
-
-import static java.lang.System.in;
-import static java.lang.System.out;
 
 public class App extends Application {
     private AbstractMap leftMap;
@@ -63,9 +51,12 @@ public class App extends Application {
         CheckBox rightMagical=new CheckBox("Right map");
         HBox checkHBox=new HBox(leftMagical,rightMagical);
         Button startButton=new Button("Start");
-        Button leftPauseButton=new Button("Pause/resume left map");
-        Button rightPauseButton=new Button("Pause/resume right map");
-        HBox buttonsBox=new HBox(startButton,leftPauseButton,rightPauseButton);
+        Button leftPauseButton=new Button("Pause/resume");
+        Button rightPauseButton=new Button("Pause/resume");
+        Button leftHighlightButton=new Button("Toggle top genome highlight");
+        Button rightHighlightButton=new Button("Toggle top genome highlight");
+        Button leftSaveButton=new Button("Save stats to file");
+        Button rightSaveButton=new Button("Save stats to file");
         Label descriptionLabel=new Label("Each animal changes its direction or moves every day, based on their genotype\n" +
                 "Animals lose energy from moving, but may regain it by eating plants\n" +
                 "Each day one plant appears in the jungle and one outside of the jungle\n" +
@@ -74,11 +65,19 @@ public class App extends Application {
                 "The right map is walled-animals cannot move outside the border\n" +
                 "If \"Magical simulation\" is selected, when there is exactly 5 animals on the map at the beginning of a day,\n" +
                 "5 new animals, which are copies of existing animals, will appear randomly\n" +
-                "To start the simulation, enter the map parameters and press Start");
+                "To start the simulation, enter the map parameters and press Start\n"+
+                "Next to each map will be shown some stats and dominating genotypes\n" +
+                "(all dominating genotypes are shown-if each animal has different genotype, all genotypes will be shown)\n"+
+                "You can pause each map by clicking the button under it\n" +
+                "When map is paused, you can:\n" +
+                "-Click one animal to highlight it and track its stats\n" +
+                " (tracking will start after unpausing)\n" +
+                "-Toggle the highlighting of all animals with dominating genotypes\n" +
+                "-Save map stats to CSV file");
         Label exceptionLabel=new Label();
         VBox parametersBox=new VBox(xLabel,xField,yLabel,yField,startEnergyLabel,startEnergyField,
                 moveEnergyLabel,moveEnergyField,plantEnergyLabel,plantEnergyField,jungleRatioLabel,jungleRatioField,
-                animalCountLabel,animalCountField,magicalLabel,checkHBox,buttonsBox,descriptionLabel,exceptionLabel);
+                animalCountLabel,animalCountField,magicalLabel,checkHBox,startButton,descriptionLabel,exceptionLabel);
 
 
 
@@ -119,13 +118,18 @@ public class App extends Application {
                 rightChart=new MapChart(rightMap);
                 leftGrid = new GridPane();
                 leftChart=new MapChart(leftMap);
-                HBox leftMapBox=new HBox(leftGrid,leftChart.getChart());
-                HBox rightMapBox=new HBox(rightGrid,rightChart.getChart());
+                HBox leftButtonBox=new HBox(leftPauseButton,leftHighlightButton,leftSaveButton);
+                VBox leftMapVBox=new VBox(leftGrid,leftButtonBox);
+                HBox leftMapBox=new HBox(leftMapVBox,leftChart.getChart());
+                HBox rightButtonBox=new HBox(rightPauseButton,rightHighlightButton,rightSaveButton);
+                VBox rightMapVBox=new VBox(rightGrid,rightButtonBox);
+                HBox rightMapBox=new HBox(rightMapVBox,rightChart.getChart());
                 hBox.getChildren().addAll(leftMapBox,rightMapBox);
                 leftEngineThread=new Thread(leftEng);
                 rightEngineThread=new Thread(rightEng);
                 leftEngineThread.start();
                 rightEngineThread.start();
+                startButton.setVisible(false);
             }
             catch (Exception ex)
             {
@@ -136,6 +140,18 @@ public class App extends Application {
             }));
             rightPauseButton.setOnAction((event2 -> {
                 rightEngineThread.interrupt();
+            }));
+            leftHighlightButton.setOnAction((event3 -> {
+                leftEng.highlightTopGenome();
+            }));
+            rightHighlightButton.setOnAction((event4 -> {
+                rightEng.highlightTopGenome();
+            }));
+            leftSaveButton.setOnAction((event5 -> {
+                leftEng.save();
+            }));
+            rightSaveButton.setOnAction((event6 -> {
+                rightEng.save();
             }));
         }));
 

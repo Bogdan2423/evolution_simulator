@@ -7,11 +7,9 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
-import java.util.Arrays;
-
 
 public class MapChart {
-    private int size=150;
+    private int size=200;
     NumberAxis xAxis1=new NumberAxis();
     NumberAxis yAxis1=new NumberAxis();
     NumberAxis xAxis2=new NumberAxis();
@@ -37,6 +35,7 @@ public class MapChart {
     Label trackedDescendantsLabel=new Label();
     Label trackedGenotype=new Label();
     Label trackedDeathDay=new Label();
+    Label magicalLabel=new Label();
     VBox box;
     AbstractMap map;
 
@@ -65,7 +64,7 @@ public class MapChart {
         VBox box1=new VBox(animalLabel,animalChart,plantLabel,plantChart);
         VBox box2=new VBox(energyLabel,energyChart,daysLabel,daysChart);
         HBox hBox=new HBox(box1,box2);
-        box=new VBox(hBox,childrenLabel,childrenChart,genotypeLabel,trackedGenotype,trackedChildrenLabel,trackedDescendantsLabel,trackedDeathDay);
+        box=new VBox(hBox,childrenLabel,childrenChart,magicalLabel,genotypeLabel,trackedGenotype,trackedChildrenLabel,trackedDescendantsLabel,trackedDeathDay);
     }
 
     public void update(){
@@ -74,7 +73,8 @@ public class MapChart {
         plantCount.getData().add(new XYChart.Data(map.getDayCount(),map.getPlantCount()));
         daysLived.getData().add(new XYChart.Data(map.getDayCount(),map.getAverageDaysLived()));
         avgChildren.getData().add(new XYChart.Data(map.getDayCount(),map.getAverageChildrenCount()));
-        genotypeLabel.setText("Dominating genotype: \n"+ map.getTopGenotype());
+        genotypeLabel.setText("Dominating genotypes: \n"+ map.getTopGenotype());
+        magicalLabel.setText(map.getMagicalLabel());
         if (map.isAnimalTracked()){
             trackedGenotype.setText("Tracked animal genotype: \n"+map.getTrackedGenes());
             trackedChildrenLabel.setText("Tracked animal children count: "+map.getTrackedChildrenCount());

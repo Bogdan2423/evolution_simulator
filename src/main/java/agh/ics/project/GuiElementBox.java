@@ -1,10 +1,8 @@
 package agh.ics.project;
 
-import javafx.geometry.HPos;
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.Image;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 
 import java.io.FileInputStream;

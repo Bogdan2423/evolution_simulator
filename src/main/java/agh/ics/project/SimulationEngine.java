@@ -1,8 +1,8 @@
 package agh.ics.project;
 
 import javafx.application.Platform;
-
-import static java.lang.System.out;
+import java.io.FileWriter;
+import java.io.IOException;
 
 
 public class SimulationEngine implements Runnable {
@@ -52,6 +52,28 @@ public class SimulationEngine implements Runnable {
     public void setAnimal(Animal animal){
         if (isPaused)
             map.setAnimal(animal);
+    }
+    public void highlightTopGenome(){
+        if (isPaused)
+            map.highlightTopGenome();
+    }
+    public void save(){
+        if (isPaused){
+            String stats=map.getStats().toString();
+            String filename="";
+            if (walledMap)
+                filename+="rightMap";
+            else
+                filename+="leftMap";
+            filename+="StatsDay"+(map.getDayCount()-1)+".csv";
+            try{
+                FileWriter file=new FileWriter(filename);
+                file.write(stats);
+                file.flush();
+                file.close();
+            }
+            catch (IOException ex){}
+        }
     }
 
     public AbstractMap getMap(){return map;}

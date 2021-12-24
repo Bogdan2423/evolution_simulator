@@ -1,9 +1,5 @@
 package agh.ics.project;
-
-import java.io.PrintStream;
 import java.util.*;
-
-import static java.lang.System.out;
 
 public abstract class AbstractMap implements IPositionChangeObserver{
     protected Vector2d lowBoundary=new Vector2d(0,0);
@@ -28,6 +24,13 @@ public abstract class AbstractMap implements IPositionChangeObserver{
     protected Map<int[], Integer> genotypeCounter=new LinkedHashMap<>();
     protected Animal trackedAnimal;
     protected int descendantCount;
+    protected boolean topGenomeHighlighted=false;
+    protected StringBuilder mapStats=new StringBuilder();
+    protected double animalSum=0;
+    protected double plantSum=0;
+    protected double avgEnergySum=0;
+    protected double avgLifetimeSum=0;
+    protected double avgChildrenSum=0;
 
 
     AbstractMap(int x,int y, int startEnergy, int plantEnergy,double jungleRatio,int moveEnergy,boolean isMagical)
@@ -43,12 +46,21 @@ public abstract class AbstractMap implements IPositionChangeObserver{
         jungleLowBoundary=new Vector2d(x/2-jungleSideLength/2,y/2-jungleSideLength/2);
         jungleUpBoundary=new Vector2d(x/2+jungleSideLength/2,y/2+jungleSideLength/2);
         this.isMagical=isMagical;
-
+        mapStats.append("Day");
+        mapStats.append(',');
+        mapStats.append("Animal count");
+        mapStats.append(',');
+        mapStats.append("Plant count");
+        mapStats.append(',');
+        mapStats.append("Avg energy");
+        mapStats.append(',');
+        mapStats.append("Avg lifetime");
+        mapStats.append(',');
+        mapStats.append("Avg children count");
+        mapStats.append("\n");
     }
 
     public void newDay(){
-        out.print("\nDay "+dayCount);
-        out.print("\nAnimal count: "+animals.size()+"\n");
         if(isMagical){
             if(animals.size()==5 && magicalCount>0)
                 magicSpawn();
@@ -64,7 +76,49 @@ public abstract class AbstractMap implements IPositionChangeObserver{
             cell.eatPlant();
             cell.breed();
         }
+        updateMapStats();
+        updateSums();
         dayCount++;
+    }
+
+    private void updateMapStats(){
+        mapStats.append(dayCount);
+        mapStats.append(',');
+        mapStats.append(animals.size());
+        mapStats.append(',');
+        mapStats.append(getPlantCount());
+        mapStats.append(',');
+        mapStats.append(getAverageEnergy());
+        mapStats.append(',');
+        mapStats.append(getAverageDaysLived());
+        mapStats.append(',');
+        mapStats.append(getAverageChildrenCount());
+        mapStats.append("\n");
+    }
+
+    private void updateSums(){
+        animalSum+=animals.size();
+        plantSum+=getPlantCount();
+        avgEnergySum+=getAverageEnergy();
+        avgLifetimeSum+=getAverageDaysLived();
+        avgChildrenSum+=getAverageChildrenCount();
+    }
+
+    public StringBuilder getStats(){
+        StringBuilder result=new StringBuilder(mapStats.toString());
+        result.append("Average: ");
+        result.append(',');
+        result.append(animalSum/dayCount);
+        result.append(',');
+        result.append(plantSum/dayCount);
+        result.append(',');
+        result.append(avgEnergySum/dayCount);
+        result.append(',');
+        result.append(avgLifetimeSum/dayCount);
+        result.append(',');
+        result.append(avgChildrenSum/dayCount);
+
+        return result;
     }
 
     private void magicSpawn(){
@@ -102,7 +156,6 @@ public abstract class AbstractMap implements IPositionChangeObserver{
             Integer curr=genotypeCounter.get(animal.getGenes());
             genotypeCounter.put(animal.getGenes(), curr+1);
         }
-        out.print("\nNew animal at: "+position);
     }
 
     public void putAnimalsRandomly(int n){
@@ -221,16 +274,28 @@ public abstract class AbstractMap implements IPositionChangeObserver{
         return (double)sum/(double)animals.size();
     }
 
-    public String getTopGenotype(){
+    public ArrayList<int[]> getTopGenotypeArray(){
         int currMax=0;
+        ArrayList result=new ArrayList();
         int[] topGenotype = new int[0];
         for(int[] genotype:genotypeCounter.keySet()){
             if (genotypeCounter.get(genotype)>currMax){
+                result.clear();
                 currMax=genotypeCounter.get(genotype);
-                topGenotype=genotype;
+            }
+            if (genotypeCounter.get(genotype)==currMax){
+                result.add(genotype);
             }
         }
-        return Arrays.toString(topGenotype);
+        return result;
+    }
+
+    public String getTopGenotype(){
+        String result="";
+        for (int[] genotype:getTopGenotypeArray()){
+            result+=Arrays.toString(genotype)+"\n";
+        }
+        return result;
     }
 
     public int getAnimalCount(){return animals.size();}
@@ -272,6 +337,15 @@ public abstract class AbstractMap implements IPositionChangeObserver{
     public Object objectAt(Vector2d position){
         return mapCells.get(position);
     }
+
+    public String getMagicalLabel(){
+        if (isMagical)
+            return "Magical evolutions left: "+magicalCount;
+        return "";
+    }
+
+    public void highlightTopGenome(){topGenomeHighlighted=!topGenomeHighlighted;}
+    public boolean isTopGenomeHighlighted(){return topGenomeHighlighted;}
     public int getDescendantCount(){return descendantCount;}
     public int getTrackedChildrenCount(){return trackedAnimal.getChildrenCount();}
     public int getTrackedDeathDay(){return trackedAnimal.getDeathDay();}

@@ -1,8 +1,5 @@
 package agh.ics.project;
-
 import java.util.*;
-
-import static java.lang.System.out;
 
 public class MapCell {
     private ArrayList<Animal> animals=new ArrayList<>();
@@ -102,8 +99,6 @@ public class MapCell {
     }
 
     public void addPlant(){
-        out.print("Added plant at: "+position);
-
         hasPlant=true;
     }
 
@@ -118,8 +113,13 @@ public class MapCell {
             return ("src/main/resources/grass.png");
         else if (map.isTracked(getTopAnimal()))
             return ("src/main/resources/trackedAnimal.png");
-        else
-            return ("src/main/resources/animal.png");
+        else if (map.isTopGenomeHighlighted()) {
+            for (int[] genotype:map.getTopGenotypeArray()) {
+                if (Arrays.equals(getTopAnimal().getGenes(),genotype))
+                    return ("src/main/resources/highlightedAnimal.png");
+            }
+        }
+        return ("src/main/resources/animal.png");
     }
     public String getLabel() {
         if (hasPlant && animals.isEmpty())
