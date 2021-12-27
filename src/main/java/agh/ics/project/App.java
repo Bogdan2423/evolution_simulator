@@ -53,8 +53,8 @@ public class App extends Application {
         Button startButton=new Button("Start");
         Button leftPauseButton=new Button("Pause/resume");
         Button rightPauseButton=new Button("Pause/resume");
-        Button leftHighlightButton=new Button("Toggle top genome highlight");
-        Button rightHighlightButton=new Button("Toggle top genome highlight");
+        Button leftHighlightButton=new Button("Toggle top genotype highlight");
+        Button rightHighlightButton=new Button("Toggle top genotype highlight");
         Button leftSaveButton=new Button("Save stats to file");
         Button rightSaveButton=new Button("Save stats to file");
         Label descriptionLabel=new Label("Each animal changes its direction or moves every day, based on their genotype\n" +

@@ -158,13 +158,7 @@ public class Animal {
         return genes[i];
     }
 
-    public boolean isAt(Vector2d position) {return this.position.equals(position);}
-
     public Vector2d getPosition(){return this.position;}
-
-    public Rotation getRotation() {
-        return rotation;
-    }
 
     public int getDaysLived(){return daysLived;}
 
